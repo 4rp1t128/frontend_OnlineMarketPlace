@@ -1,18 +1,19 @@
 import React, { useState } from 'react'
-import loginIcons from '../asset/signin.gif'
+//import loginIcons from '../asset/signin.gif'
 import { FaEye, FaEyeSlash } from 'react-icons/fa'
-import { Link } from 'react-router-dom'
-import imageTobase64 from '../helpers/imageTobase64'
+import { Link, useNavigate } from 'react-router-dom'
+//import imageTobase64 from '../helpers/imageTobase64'
+import axios from 'axios';
 
-const SignUp = () => {
+const SignUp =  () => {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [data, setData] = useState({
+    name: '',
     email: '',
     password: '',
-    name: '',
     confirmPassword: '',
-    profilePic: '',
   })
 
   const handleOnChange = (e) => {
@@ -24,7 +25,7 @@ const SignUp = () => {
     }))
   }
 
-  const handleUploadPic = async (e) => {
+  /*const handleUploadPic = async (e) => {
     const file = e.target.files[0]
     if (file) {
       const imagePic = await imageTobase64(file)
@@ -33,21 +34,35 @@ const SignUp = () => {
         profilePic: imagePic,
       }))
     }
+  }*/ 
+
+  const handleSubmit = async (e) => {
+  e.preventDefault()
+  const { name, email, password, confirmPassword } = data
+
+  if (password !== confirmPassword) {
+    alert("Password doesn't match !!")
+    return
   }
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    // Validation ya API call yahan kar sakti ho
-    console.log('Form submitted:', data)
+  try {
+    const response = await axios.post('http://localhost:3001/api/v1/users/new', {
+      name,
+      email,
+      password,
+    })
+    console.log('Signup successful:', response.data)
+    navigate("/login")
+  } catch (error) {
+    console.error('Signup failed:', error)
   }
-
-  console.log('data login', data)
+}
 
   return (
     <section id="signup">
       <div className="mx-auto container p-4">
         <div className="bg-white p-5 w-full max-w-sm mx-auto">
-          <div className="w-20 h-20 mx-auto relative overflow-hidden rounded-full">
+          {/*<div className="w-20 h-20 mx-auto relative overflow-hidden rounded-full">
             <div>
               <img src={data?.profilePic || loginIcons} alt="login icon" />
             </div>
@@ -58,7 +73,7 @@ const SignUp = () => {
               </div>
               <input type="file" className="hidden" onChange={handleUploadPic} />
             </label>
-          </div>
+          </div>*/}
 
           <form className="pt-6 flex flex-col gap-2" onSubmit={handleSubmit}>
             <div className="grid">

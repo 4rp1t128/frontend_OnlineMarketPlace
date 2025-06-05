@@ -1,19 +1,42 @@
-import React from 'react'
-import Logo from './Logo'
-import { GrSearch } from 'react-icons/gr'
-import { FaRegCircleUser } from 'react-icons/fa6'
-import { FaShoppingCart } from 'react-icons/fa'
-import { Link } from 'react-router-dom'
+import React, { useEffect, useState } from 'react';
+import Logo from './Logo';
+import { GrSearch } from 'react-icons/gr';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import axios from 'axios';
 
 const Header = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation(); // 🔁 Refresh state when URL changes
+
+  useEffect(() => {
+    const loginState = localStorage.getItem('isLoggedIn') === 'true';
+    setIsLoggedIn(loginState);
+  }, [location]); // 🔁 Updates state on every route change
+
+  const handleLogout = async () => {
+    try {
+      await axios.get('http://localhost:3001/api/v1/users/logout', {
+        withCredentials: true,
+      });
+      localStorage.removeItem('isLoggedIn');
+      setIsLoggedIn(false);
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
+
+  const handleLoginRedirect = () => {
+    navigate('/login');
+  };
+
   return (
     <header className="h-16 shadow-md bg-white">
       <div className="h-full container mx-auto flex items-center px-4 justify-between">
-        <div className="">
-         <Link to={"/"}>
+        <Link to={'/'}>
           <Logo w={64} h={55} />
-         </Link>
-        </div>
+        </Link>
 
         <div className="hidden lg:flex items-center w-full justify-between max-w-sm border rounded-full focus-within:shadow-pl-1">
           <input
@@ -27,28 +50,25 @@ const Header = () => {
         </div>
 
         <div className="flex items-center gap-7">
-          <div className="text-3xl cursor-pointer">
-            <FaRegCircleUser />
-          </div>
-
-          <div className="text-2xl relative">
-            <span>
-              <FaShoppingCart />
-            </span>
-            <div className="bg-red-600 text-white w-5 h-5 rounded-full p-1 flex items-center justify-center absolute -top-2 -right-3">
-              <p className="text-sm">0</p>
-            </div>
-          </div>
-
-          <div>
-            <Link to={'/login'} className="px-3 py-1 rounded-full text-white bg-red-600 hover:bg-red-700">
+          {isLoggedIn ? (
+            <button
+              onClick={handleLogout}
+              className="px-3 py-1 rounded-full text-white bg-red-600 hover:bg-red-700"
+            >
+              Logout
+            </button>
+          ) : (
+            <button
+              onClick={handleLoginRedirect}
+              className="px-3 py-1 rounded-full text-white bg-red-600 hover:bg-red-700"
+            >
               Login
-            </Link>
-          </div>
+            </button>
+          )}
         </div>
       </div>
     </header>
-  )
-}
+  );
+};
 
-export default Header
+export default Header;

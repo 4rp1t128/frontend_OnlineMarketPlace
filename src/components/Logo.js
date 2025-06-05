@@ -1,6 +1,4 @@
 
-
-
 import React from 'react';
 import logo from '../asset/logo-design.jpg';  // image ka path
 
